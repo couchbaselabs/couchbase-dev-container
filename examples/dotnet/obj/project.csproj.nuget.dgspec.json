@@ -1,0 +1,64 @@
+{
+  "format": 1,
+  "restore": {
+    "/workspaces/couchbase-devcontainer/examples/dotnet/project.csproj": {}
+  },
+  "projects": {
+    "/workspaces/couchbase-devcontainer/examples/dotnet/project.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/workspaces/couchbase-devcontainer/examples/dotnet/project.csproj",
+        "projectName": "project",
+        "projectPath": "/workspaces/couchbase-devcontainer/examples/dotnet/project.csproj",
+        "packagesPath": "/root/.nuget/packages/",
+        "outputPath": "/workspaces/couchbase-devcontainer/examples/dotnet/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/root/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.1": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "dependencies": {
+            "CouchbaseNetClient": {
+              "target": "Package",
+              "version": "[3.1.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/3.1.413/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

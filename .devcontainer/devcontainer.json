@@ -1,0 +1,17 @@
+{
+	"name": "Docker in Docker",
+	"dockerFile": "Dockerfile",
+	"runArgs": ["--init", "--privileged"],
+	"mounts": ["source=dind-var-lib-docker,target=/var/lib/docker,type=volume"],
+	"overrideCommand": false,
+	
+	"settings": {},
+	"extensions": [
+		"ms-azuretools.vscode-docker"
+	],
+	
+	"forwardPorts": [8091],
+
+	"postCreateCommand": ".devcontainer/startcb.sh",
+
+}

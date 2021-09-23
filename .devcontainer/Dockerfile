@@ -1,0 +1,183 @@
+ARG BASE_IMAGE=ubuntu:20.04
+
+ARG CB_EDITION=community
+ARG CB_VERSION=7.0.1
+ARG CB_IMAGE=couchbase:$CB_EDITION-$CB_VERSION
+
+ARG CB_CLIENT_OS=ubuntu2004
+ARG CB_CLIENT_OS_TYPE=focal
+
+ARG PHP_VERSION=7.4
+ARG COUCHBASE_SDK_PHP_VERSION=3.0.5
+
+ARG SCALA_VERSION=2.12.12
+ARG SBT_VERSION=1.4.7
+ARG COUCHBASE_SDK_SCALA_VERSION=1.2.1
+
+ARG RUBY_VERSION=2.7.0
+ARG COUCHBASE_SDK_RUBY_VERSION=3.0.3
+
+ARG COUCHBASE_SDK_PYTHON_VERSION=3.0.10
+
+ARG COUCHBASE_SDK_C_VERSION=3.1.0
+
+# SDK related images...
+
+FROM adoptopenjdk AS adoptopenjdk
+
+FROM maven AS maven
+
+FROM golang AS golang
+
+FROM node:14 AS node
+
+FROM mcr.microsoft.com/dotnet/core/sdk AS dotnet_core_sdk
+FROM $CB_IMAGE
+
+ARG CB_EDITION
+ARG CB_VERSION
+ARG CB_IMAGE
+
+ARG CB_CLIENT_OS
+ARG CB_CLIENT_OS_TYPE
+
+ARG PHP_VERSION
+ARG COUCHBASE_SDK_PHP_VERSION
+
+ARG SCALA_VERSION
+ARG SBT_VERSION
+ARG COUCHBASE_SDK_SCALA_VERSION
+
+ARG RUBY_VERSION
+ARG COUCHBASE_SDK_RUBY_VERSION
+
+ARG COUCHBASE_SDK_PYTHON_VERSION
+
+ARG COUCHBASE_SDK_C_VERSION
+ENV TZ=America/Los_Angeles
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN apt-get update && \
+    apt-get install -y \
+	git curl wget jq unzip zip \
+	build-essential cmake libssl-dev libevent-dev libev-dev \
+	lsb-release software-properties-common apt-transport-https gnupg2 \
+	atop htop psmisc strace time \
+	emacs vim
+
+# ------------------------------------------------------
+
+RUN apt-get install -y python3-dev python3-pip python3-setuptools
+
+RUN python3 --version && \
+    pip3 --version
+
+COPY --from=golang /usr/local/go /usr/local/go
+COPY --from=golang /go /go
+
+ENV GOPATH /go
+ENV PATH="$PATH:/usr/local/go/bin:$GOPATH/bin"
+RUN go version && \
+    go mod init test && \
+    go get github.com/couchbase/gocb/v2
+    
+COPY --from=adoptopenjdk /opt/java /opt/java
+
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH="$PATH:/opt/java/openjdk/bin"
+
+RUN javac --version && \
+    java --version
+
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+COPY --from=node /usr/local/include/node /usr/local/include/node
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+
+RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm && \
+    node --version && \
+    npm --version
+
+COPY --from=dotnet_core_sdk /usr/share/dotnet /usr/share/dotnet
+COPY --from=dotnet_core_sdk /usr/share/powershell /usr/share/powershell
+
+RUN ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet && \
+    ln -s /usr/share/powershell/pwsh /usr/bin/pwsh && \
+    dotnet --version && \
+    pwsh -Version
+
+# ------------------------------------------------------
+
+# Install python couchbase SDK, see:
+# https://docs.couchbase.com/tutorials/quick-start/quickstart-python3-native-firstquery-cb65.html
+
+RUN pip3 install six couchbase==${COUCHBASE_SDK_PYTHON_VERSION}
+
+# NOTE: Alternative to specify LCB: LCB_TAG=3.1.0 python3 -m pip install couchbase
+
+RUN pip3 show couchbase | grep Version | cut -f 2 -d ' ' > /opt/couchbase/VERSION-sdk-python.ver
+
+# ------------------------------------------------------
+
+# Install golang couchbase SDK:
+
+RUN go get github.com/couchbase/gocb
+
+# -------------------------------------------------------
+#   C/C++ (libcouchbase, LCB)
+# -------------------------------------------------------
+
+# Get the Couchbase Repository Key
+ADD https://packages.couchbase.com/clients/c/repos/deb/couchbase.key .
+
+RUN apt-key add ./couchbase.key \
+    && rm ./couchbase.key \
+    && apt-add-repository "deb http://packages.couchbase.com/clients/c/repos/deb/${CB_CLIENT_OS} ${CB_CLIENT_OS_TYPE} ${CB_CLIENT_OS_TYPE}/main"
+
+RUN curl -O https://packages.couchbase.com/clients/c/libcouchbase-${COUCHBASE_SDK_C_VERSION}_${CB_CLIENT_OS}_${CB_CLIENT_OS_TYPE}_amd64.tar \
+    && tar xvf libcouchbase-*_amd64.tar \
+    && cd libcouchbase-*_amd64 \
+    && dpkg -i libcouchbase3-libevent_*.deb libcouchbase3-libev_*.deb libcouchbase3_*.deb libcouchbase3-tools_*.deb libcouchbase-dev*.deb
+
+# -------------------------------------------------------
+#   PHP
+# -------------------------------------------------------
+
+RUN LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php \
+    && apt-get update \
+    && apt-get -y install php${PHP_VERSION} php${PHP_VERSION}-cli php${PHP_VERSION}-common php${PHP_VERSION}-fpm php${PHP_VERSION}-dev php${PHP_VERSION}-xml \
+    && php -v
+
+# Install PHP ext-couchbase
+RUN pecl install https://packages.couchbase.com/clients/php/couchbase-${COUCHBASE_SDK_PHP_VERSION}.tgz && \
+    cp /usr/lib/php/${PHP_VERSION}/php.ini-development /usr/lib/php/${PHP_VERSION}/php.ini && \
+    printf 'extension=json.so\nextension=couchbase.so' >> /etc/php/${PHP_VERSION}/cli/php.ini
+
+# -------------------------------------------------------
+#   Scala and SBT
+# -------------------------------------------------------
+
+RUN wget -q -O scala-${SCALA_VERSION}.tgz https://downloads.lightbend.com/scala/${SCALA_VERSION}/scala-${SCALA_VERSION}.tgz \
+    && tar -xzf scala-${SCALA_VERSION}.tgz -C /opt \
+    && ln -s /opt/scala-${SCALA_VERSION}/bin/scala /usr/bin/scala \
+    && ln -s /opt/scala-${SCALA_VERSION}/bin/scalac /usr/bin/scalac \
+    && rm scala-${SCALA_VERSION}.tgz \
+    && scala -version
+
+RUN wget -q -O sbt-${SBT_VERSION}.tgz https://github.com/sbt/sbt/releases/download/v${SBT_VERSION}/sbt-${SBT_VERSION}.tgz \
+    && tar -xzf sbt-${SBT_VERSION}.tgz -C /opt \
+    && ln -s /opt/sbt/bin/sbt /usr/bin/sbt \
+    && rm sbt-${SBT_VERSION}.tgz \
+    && sbt -version
+
+# -------------------------------------------------------
+#   Ruby
+# -------------------------------------------------------
+RUN gpg2 --keyserver hkp://keyserver.ubuntu.com --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB 
+RUN curl -sSL https://get.rvm.io | bash -s stable \
+    && bash -c "source /etc/profile.d/rvm.sh;rvm install ruby-${RUBY_VERSION};ruby --version; wget -q -O couchbase-${COUCHBASE_SDK_RUBY_VERSION}-x86_64-linux-${RUBY_VERSION}.gem https://packages.couchbase.com/clients/ruby/sdk-${COUCHBASE_SDK_RUBY_VERSION}/couchbase-${COUCHBASE_SDK_RUBY_VERSION}-x86_64-linux-${RUBY_VERSION}.gem;gem install couchbase-${COUCHBASE_SDK_RUBY_VERSION}-x86_64-linux-${RUBY_VERSION}.gem"
+
+ENV GEM_HOME="/usr/local/rvm/gems/ruby-${RUBY_VERSION}" \
+    GEM_PATH="/usr/local/rvm/gems/ruby-${RUBY_VERSION}/bin:/usr/local/rvm/gems/ruby-${RUBY_VERSION}@global/bin"
+
+ENV PATH="${PATH}:/usr/local/rvm/rubies/ruby-${RUBY_VERSION}/bin:${GEM_PATH}:/usr/local/rvm/bin"
+

@@ -1,0 +1,4 @@
+/workspaces/couchbase-devcontainer/examples/dotnet/obj/Debug/netcoreapp3.1/project.csprojAssemblyReference.cache
+/workspaces/couchbase-devcontainer/examples/dotnet/obj/Debug/netcoreapp3.1/project.AssemblyInfoInputs.cache
+/workspaces/couchbase-devcontainer/examples/dotnet/obj/Debug/netcoreapp3.1/project.AssemblyInfo.cs
+/workspaces/couchbase-devcontainer/examples/dotnet/obj/Debug/netcoreapp3.1/project.csproj.CoreCompileInputs.cache
