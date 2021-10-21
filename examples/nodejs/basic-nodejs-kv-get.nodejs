@@ -1,0 +1,30 @@
+/*
+File: basic-nodejs-kv-get.nodejs 
+Description: Key Value Get
+
+Given a document's key, you can use the collection.get() method to retrieve a document from a collection.
+<br/><br/>
+See more at the SDK documentation on
+<a target="_blank" href="https://docs.couchbase.com/nodejs-sdk/current/howtos/kv-operations.html">Node.js Key Value Operations</a>.
+*/
+
+const couchbase = require('couchbase')
+
+const cluster = new couchbase.Cluster('couchbase://127.0.0.1', {
+  username: 'Administrator', password: 'password'
+})
+
+const bucket = cluster.bucket('travel-sample')
+const collection = bucket.defaultCollection()
+
+const getDocument = async (key) => {
+  try {
+    const result = await collection.get(key)
+    console.log(result)
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+getDocument('airline_10')
+  .then(() => process.exit(0))

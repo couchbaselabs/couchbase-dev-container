@@ -1,6 +1,6 @@
 {
-	"name": "Docker in Docker",
-	"dockerFile": "Dockerfile",
+	"name": "Couchbase playground",
+	"image": "public.ecr.aws/z2f7n8a1/couchbase-dev-container:latest",
 	"runArgs": ["--init", "--privileged"],
 	"mounts": ["source=dind-var-lib-docker,target=/var/lib/docker,type=volume"],
 	"overrideCommand": false,

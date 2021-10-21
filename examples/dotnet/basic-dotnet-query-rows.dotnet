@@ -1,0 +1,46 @@
+/*
+File: basic-dotnet-query-rows.dotnet 
+Description: Query Rows
+
+Basic N1QL query,
+with looping through each returned row.
+<br/><br/>
+Visit the docs to learn more about
+<a target="_blank" href="https://docs.couchbase.com/dotnet-sdk/current/howtos/n1ql-queries-with-sdk.html#the-query-result">Handling Query Results in .NET</a>.
+*/
+
+using System;
+using System.Threading.Tasks;
+using Couchbase;
+using Couchbase.Query;
+
+namespace CouchbaseDotNetExample
+{
+  class Program
+  {
+    static async Task Main(string[] args)
+    {
+      var cluster = await Cluster.ConnectAsync(
+        "couchbase://127.0.0.1", "Administrator", "password"
+      );
+
+      var bucket = await cluster.BucketAsync("travel-sample");
+
+      var query =
+        "SELECT h.name, h.city, h.state " +
+        "FROM `travel-sample` h " +
+        "WHERE h.type = 'hotel' " +
+          "AND h.city = 'Malibu' LIMIT 5";
+
+      var result = await cluster.QueryAsync<dynamic>(query);
+      if (result.MetaData.Status == QueryStatus.Success) {
+        Console.WriteLine("Hotel Results:");
+        await foreach (var row in result.Rows) {
+          Console.WriteLine($"Hotel: {row.name}, {row.city}");
+        }
+      }
+
+      await cluster.DisposeAsync();
+    }
+  }
+}

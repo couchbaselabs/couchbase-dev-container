@@ -1,3 +1,14 @@
+/*
+File: basic-go-kv-get.go 
+Description: Key Value Get
+
+Given a document's key, you can use the collection.get() method to retrieve a document from a collection.
+<br/><br/>
+See more at the SDK documentation on
+<a target="_blank" href="https://docs.couchbase.com/go-sdk/current/howtos/kv-operations.html">Go Key Value Operations</a>.
+*/
+
+
 package main
 
 import (

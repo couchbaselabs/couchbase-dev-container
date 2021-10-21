@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "64Wz2ywdmcHDmQUYReGemmilkjlmVfpJq7IsSpEK+0KqCnZQZwjtPz+deB++8gpJj24e2XLu5bKh/ZjGyAhQSw==",
+  "dgSpecHash": "F5aUPwSVeWj8ppc2QxpnxHIWEd5cCywj+BkKZ8NQQc98qF4I/WN4IkIgL9aHX8RBkXtwSOuBGXgg0jckrsh4rw==",
   "success": true,
-  "projectFilePath": "/workspaces/couchbase-devcontainer/examples/dotnet/project.csproj",
+  "projectFilePath": "/workspaces/couchbase-dev-container/examples/dotnet/project.csproj",
   "expectedPackageFiles": [
     "/root/.nuget/packages/couchbasenetclient/3.1.3/couchbasenetclient.3.1.3.nupkg.sha512",
     "/root/.nuget/packages/dnsclient/1.3.2/dnsclient.1.3.2.nupkg.sha512",

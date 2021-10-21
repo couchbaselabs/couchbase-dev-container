@@ -1,0 +1,41 @@
+/*
+File: basic-nodejs-query-named-param.nodejs 
+Description: Query w/ Named Param
+
+This example shows how to use named parameters with the cluster.query() method.
+<br/><br/>
+Visit the docs to learn more about
+<a target="_blank" href="https://docs.couchbase.com/nodejs-sdk/current/howtos/n1ql-queries-with-sdk.html">N1QL Queries with Node.js</a>.
+*/
+
+const couchbase = require('couchbase')
+
+const cluster = new couchbase.Cluster('couchbase://127.0.0.1', {
+  username: 'Administrator', password: 'password'
+})
+cluster.bucket('travel-sample')
+
+const getHotelsByCity = async (city) => {
+  try {
+    const query = `
+      SELECT h.name, h.city, h.state 
+      FROM \`travel-sample\` h
+      WHERE h.type = $TYPE
+        AND h.city = $CITY LIMIT 5;
+    `
+    const options = {
+      parameters: {
+        TYPE: 'hotel', CITY: city
+      }
+    }
+
+    const result = await cluster.query(query, options)
+    console.log('Query Result: ')
+    console.log(result.rows)
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+getHotelsByCity('Malibu')
+  .then(() => process.exit(0))

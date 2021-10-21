@@ -1,0 +1,37 @@
+/*
+File: basic-dotnet-kv-get.dotnet 
+Description: Key Value Get
+
+Given a document's key, you can use the collection.GetAsync() method to retrieve a document from a collection.
+<br/><br/>
+See more at the SDK documentation on
+<a target="_blank" href="https://docs.couchbase.com/dotnet-sdk/current/howtos/kv-operations.html">.NET Key Value Operations</a>.
+*/
+
+using System;
+using System.Threading.Tasks;
+using Couchbase;
+
+namespace CouchbaseDotNetExample
+{
+  class Program
+  {
+    static async Task Main(string[] args)
+    {
+      var cluster = await Cluster.ConnectAsync(
+        "couchbase://127.0.0.1", "Administrator", "password"
+      );
+
+      var bucket = await cluster.BucketAsync("travel-sample");
+      var scope = await bucket.ScopeAsync("_default");
+      var collection = await scope.CollectionAsync("_default");
+
+      var result = await collection.GetAsync("airline_10");
+      var airline = result.ContentAs<dynamic>();
+
+      Console.WriteLine(airline);
+
+      await cluster.DisposeAsync();
+    }
+  }
+}

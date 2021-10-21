@@ -463,11 +463,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/workspaces/couchbase-devcontainer/examples/dotnet/project.csproj",
+      "projectUniqueName": "/workspaces/couchbase-dev-container/examples/dotnet/project.csproj",
       "projectName": "project",
-      "projectPath": "/workspaces/couchbase-devcontainer/examples/dotnet/project.csproj",
+      "projectPath": "/workspaces/couchbase-dev-container/examples/dotnet/project.csproj",
       "packagesPath": "/root/.nuget/packages/",
-      "outputPath": "/workspaces/couchbase-devcontainer/examples/dotnet/obj/",
+      "outputPath": "/workspaces/couchbase-dev-container/examples/dotnet/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/root/.nuget/NuGet/NuGet.Config"
@@ -512,7 +512,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/3.1.413/RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/3.1.414/RuntimeIdentifierGraph.json"
       }
     }
   }
